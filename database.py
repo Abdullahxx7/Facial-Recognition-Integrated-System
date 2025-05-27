@@ -1040,6 +1040,39 @@ class Database:
             )
         return self.cursor.fetchall()
 
+    def get_student_attendance(self, student_id, course_id=None):
+        """Get attendance records for a student, optionally filtered by course"""
+        try:
+            if course_id:
+                # Get attendance for specific course
+                self.cursor.execute(
+                    """
+                    SELECT c.name || ' (' || c.code || '-' || c.section || ')', a.date, a.status, a.time, a.second_time
+                    FROM attendance a
+                    JOIN courses c ON a.course_id = c.reference_number
+                    WHERE a.student_id = ? AND a.course_id = ? AND a.is_cancelled = 0
+                    ORDER BY a.date DESC
+                    """,
+                    (student_id, course_id)
+                )
+            else:
+                # Get attendance for all courses
+                self.cursor.execute(
+                    """
+                    SELECT c.name || ' (' || c.code || '-' || c.section || ')', a.date, a.status, a.time, a.second_time
+                    FROM attendance a
+                    JOIN courses c ON a.course_id = c.reference_number
+                    WHERE a.student_id = ? AND a.is_cancelled = 0
+                    ORDER BY a.date DESC, c.code, c.section
+                    """,
+                    (student_id,)
+                )
+
+            return self.cursor.fetchall()
+        except Exception as e:
+            print(f"Error getting student attendance: {e}")
+            return []
+
     def get_student_attendance_stats(self, student_id, course_id=None):
         """Get attendance statistics for a student"""
         if course_id:
