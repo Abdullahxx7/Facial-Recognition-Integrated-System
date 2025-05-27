@@ -1,5 +1,5 @@
 # FARIS - فارس
-# Face Recognition Integrated System
+# Facial Recognition Integrated System
 
 A comprehensive attendance management system using Vision Transformer (ViT) based face recognition technology, built with PyQt5 and SQLite.
 
