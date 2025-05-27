@@ -1523,7 +1523,7 @@ class TeacherWindow(QMainWindow):
 
         # Get course details
         course = self.database.get_course_by_id(course_id)
-        course_code = course[1]  # Code (since reference_number is at index 0)
+        course_code = course[1]  # Code
         course_name = course[2]  # Name
         course_section = course[3]  # Section
 
@@ -1546,7 +1546,7 @@ class TeacherWindow(QMainWindow):
             student_stats = []
             for student in enrolled_students:
                 student_id = student[0]
-                student_name = student[2]  # Name is at index 2
+                student_name = student[2]
 
                 # Get attendance records for this student
                 self.database.cursor.execute(
@@ -1700,9 +1700,9 @@ class TeacherWindow(QMainWindow):
         courses_group = QGroupBox("Assigned Courses")
         courses_layout = QVBoxLayout(courses_group)
 
-        self.assigned_courses_table = QTableWidget(0, 9)
+        self.assigned_courses_table = QTableWidget(0, 8)
         self.assigned_courses_table.setHorizontalHeaderLabels([
-            "ID", "Ref #", "Code", "Section", "Name", "Days", "Time", "Classroom", "Date Range"
+            "Ref #", "Code", "Section", "Name", "Days", "Time", "Classroom", "Date Range"
         ])
         self.assigned_courses_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.assigned_courses_table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -1847,16 +1847,16 @@ class TeacherWindow(QMainWindow):
             if len(course) < 7:  # Need at least 7 fields for basic display
                 continue
 
-            reference_number = course[0]  # Now the primary key
-            code = course[2]
-            name = course[3]
-            section = course[4]
-            start_time = course[5]
-            end_time = course[6]
-            classroom = course[7] if len(course) > 7 else "N/A"
-            days = course[8] if len(course) > 8 else "N/A"
-            start_date = course[9] if len(course) > 9 else "N/A"
-            end_date = course[10] if len(course) > 10 else "N/A"
+            reference_number = course[0]
+            code = course[1]
+            name = course[2]
+            section = course[3]
+            start_time = course[4]
+            end_time = course[5]
+            classroom = course[6] if len(course) > 6 else "N/A"
+            days = course[7] if len(course) > 7 else "N/A"
+            start_date = course[8] if len(course) > 8 else "N/A"
+            end_date = course[9] if len(course) > 9 else "N/A"
 
             display_text = f"{code}-{name}: {section}"
 
