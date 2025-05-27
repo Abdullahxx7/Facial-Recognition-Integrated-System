@@ -1,6 +1,3 @@
-# Fix for student_window.py matplotlib imports
-
-# At the beginning of the file:
 import cv2
 import numpy as np
 import datetime
@@ -357,10 +354,9 @@ class StudentWindow(QMainWindow):
         # Courses section
         layout.addWidget(QLabel("My Courses:"))
 
-        # Updated to include more columns
-        self.courses_table = QTableWidget(0, 8)
+        self.courses_table = QTableWidget(0, 7)
         self.courses_table.setHorizontalHeaderLabels([
-            "ID", "Ref #", "Code", "Name", "Section", "Days", "Time", "Room"
+            "Ref #", "Code", "Name", "Section", "Days", "Time", "Room"
         ])
         self.courses_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.courses_table.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -372,7 +368,6 @@ class StudentWindow(QMainWindow):
         # Attendance records section
         layout.addWidget(QLabel("Attendance Records:"))
 
-        # Updated to include more columns
         self.attendance_table = QTableWidget(0, 5)
         self.attendance_table.setHorizontalHeaderLabels(["Course", "Date", "Status", "First Check-in", "Second Check-in"])
         self.attendance_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -628,27 +623,28 @@ class StudentWindow(QMainWindow):
 
                 self.courses_table.insertRow(i)
 
-                # ID, Ref #, Code, Name, Section, Days, Time, Room
+                # Fixed column mapping based on get_student_courses query:
+                # 0: reference_number, 1: code, 2: name, 3: section, 4: start_time, 5: end_time, 6: classroom, 7: days
                 try:
-                    # Check if we have all necessary data
-                    reference_number = course[0] if len(course) > 0 else "N/A"  # Primary key
-                    code = course[1] if len(course) > 1 else "N/A"
-                    name = course[2] if len(course) > 2 else "N/A"
-                    section = course[3] if len(course) > 3 else "N/A"
-                    start_time = course[4] if len(course) > 4 else "N/A"  # Time
-                    end_time = course[5] if len(course) > 5 else "N/A"
+                    reference_number = course[0] if len(course) > 0 else "N/A"  # reference_number
+                    code = course[1] if len(course) > 1 else "N/A"             # code
+                    name = course[2] if len(course) > 2 else "N/A"             # name
+                    section = course[3] if len(course) > 3 else "N/A"          # section
+                    start_time = course[4] if len(course) > 4 else "N/A"       # start_time
+                    end_time = course[5] if len(course) > 5 else "N/A"         # end_time
+                    classroom = course[6] if len(course) > 6 else "N/A"        # classroom (FIXED)
+                    days = course[7] if len(course) > 7 else "N/A"             # days
+
                     time_str = f"{start_time} - {end_time}"
-                    classroom = course[7] if len(course) > 7 else "N/A"  # Classroom
-                    days = course[10] if len(course) > 10 else "N/A"  # Days
 
-                    self.courses_table.setItem(i, 0, QTableWidgetItem(str(reference_number)))  # Reference Number
-                    self.courses_table.setItem(i, 1, QTableWidgetItem(code))  # Code
-                    self.courses_table.setItem(i, 2, QTableWidgetItem(name))  # Name
-                    self.courses_table.setItem(i, 3, QTableWidgetItem(section))  # Section
-                    self.courses_table.setItem(i, 4, QTableWidgetItem(days))
-                    self.courses_table.setItem(i, 5, QTableWidgetItem(time_str))
-                    self.courses_table.setItem(i, 6, QTableWidgetItem(classroom))
-
+                    # Table columns: Ref #, Code, Name, Section, Days, Time, Room
+                    self.courses_table.setItem(i, 0, QTableWidgetItem(str(reference_number)))  # Ref #
+                    self.courses_table.setItem(i, 1, QTableWidgetItem(code))                   # Code
+                    self.courses_table.setItem(i, 2, QTableWidgetItem(name))                   # Name
+                    self.courses_table.setItem(i, 3, QTableWidgetItem(section))                # Section
+                    self.courses_table.setItem(i, 4, QTableWidgetItem(days))                   # Days
+                    self.courses_table.setItem(i, 5, QTableWidgetItem(time_str))               # Time
+                    self.courses_table.setItem(i, 6, QTableWidgetItem(classroom))              # Room (FIXED)
 
                 except Exception as e:
                     print(f"Error adding course to table: {e}")
@@ -679,31 +675,30 @@ class StudentWindow(QMainWindow):
                     continue
 
                 # Check if days field exists and contains today
-                if len(course) > 10 and course[10] and today in course[10]:
+                days = course[7] if len(course) > 7 else ""
+                if days and today in days:
                     todays_courses.append(course)
 
             # Add to table
             for i, course in enumerate(todays_courses):
                 self.todays_classes_table.insertRow(i)
 
-                # Code, Name, Section
+                # Fixed column mapping
                 code = course[1] if len(course) > 1 else "N/A"
                 name = course[2] if len(course) > 2 else "N/A"
                 section = course[3] if len(course) > 3 else "N/A"
-
-                self.todays_classes_table.setItem(i, 0, QTableWidgetItem(code))  # Code
-                self.todays_classes_table.setItem(i, 1, QTableWidgetItem(section))  # Section
-                self.todays_classes_table.setItem(i, 2, QTableWidgetItem(name))  # Name
-
-                # Combine start and end times
                 start_time = course[4] if len(course) > 4 else "N/A"
                 end_time = course[5] if len(course) > 5 else "N/A"
-                time_str = f"{start_time} - {end_time}"
-                self.todays_classes_table.setItem(i, 3, QTableWidgetItem(time_str))
+                classroom = course[6] if len(course) > 6 else "N/A"  # FIXED
 
-                # Classroom
-                classroom = course[7] if len(course) > 7 else "N/A"
-                self.todays_classes_table.setItem(i, 4, QTableWidgetItem(classroom))
+                time_str = f"{start_time} - {end_time}"
+
+                # Table columns: Code, Section, Name, Time, Room
+                self.todays_classes_table.setItem(i, 0, QTableWidgetItem(code))      # Code
+                self.todays_classes_table.setItem(i, 1, QTableWidgetItem(section))   # Section
+                self.todays_classes_table.setItem(i, 2, QTableWidgetItem(name))      # Name
+                self.todays_classes_table.setItem(i, 3, QTableWidgetItem(time_str))  # Time
+                self.todays_classes_table.setItem(i, 4, QTableWidgetItem(classroom)) # Room (FIXED)
         except Exception as e:
             print(f"Error loading today's classes: {e}")
             import traceback
@@ -723,7 +718,7 @@ class StudentWindow(QMainWindow):
 
             # Add to dropdown
             for course in courses:
-                if not course or len(course) < 5:
+                if not course or len(course) < 4:
                     continue
 
                 reference_number = course[0]
@@ -738,41 +733,76 @@ class StudentWindow(QMainWindow):
             traceback.print_exc()
 
     def load_student_statistics(self):
-        """Load attendance records for selected course with error handling"""
+        """Load student statistics and update the display"""
         try:
-            selected_row = self.courses_table.currentRow()
-            if selected_row < 0:
-                return
+            # Get selected course
+            selected_course_data = self.stats_course_combo.currentData()
+            course_id = selected_course_data if selected_course_data is not None else None
 
-            reference_number_item = self.courses_table.item(selected_row, 0)
-            if not reference_number_item:
-                return
+            # Get attendance statistics
+            stats = self.database.get_student_attendance_stats(self.student_id, course_id)
+            
+            # Update statistics display
+            total_days = stats.get('total_days', 0)
+            present_count = stats.get(STATUS_PRESENT, 0)
+            late_count = stats.get(STATUS_LATE, 0)
+            absent_count = stats.get(STATUS_ABSENT, 0)
+            unauthorized_count = stats.get(STATUS_UNAUTHORIZED_DEPARTURE, 0)
 
-            reference_number = reference_number_item.text()  # This is the course_id
+            # Update labels
+            self.total_classes_label.setText(str(total_days))
+            self.present_count_label.setText(str(present_count))
+            self.late_count_label.setText(str(late_count))
+            self.absent_count_label.setText(str(absent_count))
+            self.unauthorized_count_label.setText(str(unauthorized_count))
 
-            # Clear attendance table
-            self.attendance_table.setRowCount(0)
+            # Calculate attendance rate
+            if total_days > 0:
+                attendance_rate = ((present_count + late_count) / total_days) * 100
+                self.attendance_rate_label.setText(f"{attendance_rate:.1f}%")
 
-            # Get attendance records
-            records = self.database.get_student_attendance(self.student_id, reference_number)
-            if not records:
-                return
+                # Update status based on attendance rate
+                if attendance_rate >= 90:
+                    status_text = "Good Standing"
+                    status_color = "green"
+                elif attendance_rate >= 85:
+                    status_text = "Warning"
+                    status_color = "#FFC107"
+                elif attendance_rate >= 80:
+                    status_text = "At Risk"
+                    status_color = "#FF9800"
+                else:
+                    status_text = "Below Threshold"
+                    status_color = "red"
 
-            # Add to table - including time and second_time
-            for i, record in enumerate(records):
-                if not record or len(record) < 3:
-                    continue
+                self.status_label.setText(status_text)
+                self.status_label.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {status_color};")
+                self.attendance_rate_label.setStyleSheet(f"font-size: 14px; font-weight: bold; color: {status_color};")
+            else:
+                self.attendance_rate_label.setText("No Data")
+                self.status_label.setText("No Data")
 
-                self.attendance_table.insertRow(i)
+            # Update chart if available
+            if self.matplotlib_available and hasattr(self, 'attendance_chart'):
+                self.attendance_chart.plot_attendance_pie_chart(stats)
 
-                # Course name, date, status, time, second_time
-                self.attendance_table.setItem(i, 0, QTableWidgetItem(str(record[0])))
-                self.attendance_table.setItem(i, 1, QTableWidgetItem(str(record[1])))
-                self.attendance_table.setItem(i, 2, QTableWidgetItem(str(record[2])))
-                self.attendance_table.setItem(i, 3, QTableWidgetItem(str(record[3]) if len(record) > 3 and record[3] else ""))
-                self.attendance_table.setItem(i, 4, QTableWidgetItem(str(record[4]) if len(record) > 4 and record[4] else ""))
+            # Load attendance records for the table
+            self.load_attendance_records_to_stats_table(course_id)
+
+            # Update absence list
+            self.update_absence_list(course_id)
+
+            # Update attendance status widget if available
+            if hasattr(self, 'attendance_status_widget') and hasattr(self.attendance_status_widget, 'update_data'):
+                attendance_data = {
+                    'percentage': ((present_count + late_count) / total_days * 100) if total_days > 0 else 100.0,
+                    'absence_count': absent_count + unauthorized_count,
+                    'total_lectures': total_days
+                }
+                self.attendance_status_widget.update_data(attendance_data)
+
         except Exception as e:
-            print(f"Error loading attendance records: {e}")
+            print(f"Error loading student statistics: {e}")
             import traceback
             traceback.print_exc()
 
@@ -825,6 +855,20 @@ class StudentWindow(QMainWindow):
             import traceback
             traceback.print_exc()
 
+    def update_absence_list(self, course_id=None):
+        """Update the absence list with recent absences"""
+        try:
+            self.absence_list.clear()
+            
+            # Get absence dates (this method needs to be implemented)
+            absence_dates = self.get_absence_dates(course_id)
+            
+            for date in absence_dates[:10]:  # Show only last 10 absences
+                self.absence_list.addItem(date)
+                
+        except Exception as e:
+            print(f"Error updating absence list: {e}")
+
     def get_absence_dates(self, course_id=None):
         """Get a list of dates when the student was absent"""
         try:
@@ -834,7 +878,7 @@ class StudentWindow(QMainWindow):
                     """
                     SELECT a.date, c.code, c.section
                     FROM attendance a
-                    JOIN courses c ON a.course_id = c.id
+                    JOIN courses c ON a.course_id = c.reference_number
                     WHERE a.student_id = ? AND a.course_id = ? AND a.status IN (?, ?)
                     ORDER BY a.date DESC
                     """,
@@ -845,7 +889,7 @@ class StudentWindow(QMainWindow):
                     """
                     SELECT a.date, c.code, c.section
                     FROM attendance a
-                    JOIN courses c ON a.course_id = c.id
+                    JOIN courses c ON a.course_id = c.reference_number
                     WHERE a.student_id = ? AND a.status IN (?, ?)
                     ORDER BY a.date DESC
                     """,
