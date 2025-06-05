@@ -119,7 +119,7 @@ filetype>=1.0.0
 ## Project Structure
 
 ```
-faris-attendance-system/
+facial-recognition-integrated-system/
 │
 ├── main.py                    # Application entry point
 ├── config.py                  # Configuration settings
